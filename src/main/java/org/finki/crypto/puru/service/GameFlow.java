@@ -89,9 +89,10 @@ public final class GameFlow {
         DefenderAfterAttack defenderAfterAttack = new DefenderAfterAttack();
         defenderAfterAttack.setHit(decryptedDifferences.stream()
                 .anyMatch(dec -> dec.equals(new Location(0, 0))));
+        short shipId = defender.getBoard().getGrid()[target.getRow()][target.getCol()];
+        defender.getBoard().getGrid()[target.getRow()][target.getCol()] = -1; // mark as attacked
         if (defenderAfterAttack.isHit()) {
             // update the ship details
-            short shipId = defender.getBoard().getGrid()[target.getRow()][target.getCol()];
             defender.getShips().stream().filter(ship -> ship.getId() == shipId)
                     .forEach(ship -> {
                         if (ship.checkWhetherHit(target) && ship.isSunk()) {
@@ -107,6 +108,7 @@ public final class GameFlow {
                                     defender.getName());
                             // game over!
                             defenderAfterAttack.setGameOver(true);
+                            defender.getBoard().display(defender.getName());
                         }
                     });
         }

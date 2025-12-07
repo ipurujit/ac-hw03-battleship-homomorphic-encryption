@@ -1,0 +1,44 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+Actor Alice as a
+Participant Server as s
+Actor Bob as b
+
+a <--> b: Share public keys
+
+a -> s: Share 16 encrypted ship coordinates
+
+b --> b: Pick attack coordinates
+b --> b: Encrypt attack coordinates\nusing Alice public key
+b -> s: Send encrypted attack coordinates
+
+s --> s: Compute encrypted difference\nwith 16 ship positions
+s --> s: Multiply with blinding factor
+s -> a: Send encrypted attack coordinates\nand blinded coordinate differences
+
+a --> a: Decrypt blinded coordinates\nusing Alice private key
+a --> a: Check whether any difference is 0
+
+alt "HIT if difference was 0"
+    a --> a: Check whether any ship sank
+    alt "SHIP SANK"
+        a --> a: Check whether all ships lost
+        alt "ALL SHIPS LOST"
+            a -[#red]> s: Announce GAME OVER:\nALICE LOST, BOB WON
+            s -[#green]> b: Announce GAME OVER:\nALICE LOST, BOB WON
+        end
+    end
+    a -> s: Announce HIT
+    s -> b: Announce HIT
+    b --> b: Store successful attack
+
+else "MISS if difference not 0"
+    a -> s: Announce MISS, difference
+    s -> b: Announce MISS
+    b --> b: Store failed attack
+
+end
+@enduml
